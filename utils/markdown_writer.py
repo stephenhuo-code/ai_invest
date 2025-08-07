@@ -3,11 +3,13 @@ import datetime
 import os
 
 def write_markdown_report(news, analysis, prices, sectors, macro):
-    today = datetime.date.today().isoformat()
+    now = datetime.datetime.now()
+    timestamp = now.strftime("%Y-%m-%d_%H-%M")
+    date_display = now.strftime("%Y-%m-%d %H:%M")
     os.makedirs("reports", exist_ok=True)
-    path = f"reports/report_{today}.md"
+    path = f"reports/report_{timestamp}.md"
     with open(path, "w", encoding="utf-8") as f:
-        f.write(f"# 📊 投资研究周报 ({today})\n\n")
+        f.write(f"# 📊 投资研究周报 ({date_display})\n\n")
         f.write("## 🔥 热点新闻与分析\n")
         for r in analysis:
             f.write(f"### {r['title']}\n{r['analysis']}\n\n")
