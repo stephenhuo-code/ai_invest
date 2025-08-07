@@ -1,0 +1,5 @@
+
+openai_api_key: "your_openai_api_key_here"
+rss_feeds:
+  - https://finance.yahoo.com/news/rssindex
+slack_webhook: "https://hooks.slack.com/services/your/webhook/url"

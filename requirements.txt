@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+openai
+yfinance
+feedparser
+newspaper3k
+beautifulsoup4
+requests
+pyyaml
+pandas
