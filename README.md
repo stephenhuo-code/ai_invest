@@ -11,77 +11,36 @@
   - 抓取 TradingEconomics 宏观经济指标。
 - **报告生成与通知**：将上述信息整理成 Markdown 周报，保存到 `reports/` 目录，并通过 Slack Webhook 发送摘要。
 
-## 环境准备
+## 环境要求
 
-### 1. 安装依赖
+### 系统要求
+- Python 3.9+ (推荐 Python 3.11 或 3.13)
+- conda 或 miniconda (推荐使用 conda 环境管理)
+
+### 环境准备
+
+#### 方法一：使用 conda 环境（推荐）
+
+1. **创建 conda 环境**
+   ```bash
+   # 创建新的 conda 环境
+   conda create -n ai_invest python=3.11
+   
+   # 激活环境
+   conda activate ai_invest
+   ```
+
+2. **安装依赖**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 配置环境变量
-
-#### 必需的环境变量
-
-**OpenAI API 密钥**
-```bash
-export OPENAI_API_KEY="your_openai_api_key_here"
-```
-
-**获取 OpenAI API 密钥的步骤：**
-1. 访问 [OpenAI 平台](https://platform.openai.com/account/api-keys)
-2. 登录你的账户
-3. 点击 "Create new secret key"
-4. 复制生成的 API 密钥
-
-#### 可选的环境变量
-
-**Slack Webhook URL（用于发送通知）**
-```bash
-export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
-```
-
-**获取 Slack Webhook URL 的步骤：**
-1. 访问 [Slack API 网站](https://api.slack.com/apps)
-2. 点击 "Create New App"
-3. 选择 "From scratch"
-4. 输入应用名称（如 "AI Invest Bot"）
-5. 选择你的工作区
-6. 在左侧菜单选择 "Incoming Webhooks"
-7. 点击 "Activate Incoming Webhooks"
-8. 点击 "Add New Webhook to Workspace"
-9. 选择要发送消息的频道（如 #general）
-10. 点击 "Allow"
-11. 复制生成的 Webhook URL
-
-**Slack Bot Token（可选，用于高级功能）**
-```bash
-export SLACK_BOT_TOKEN="xoxb-your-bot-token-here"
-```
-
-**获取 Slack Bot Token 的步骤：**
-1. 在 Slack App 设置页面，选择 "OAuth & Permissions"
-2. 在 "Scopes" 部分添加以下权限：
-   - `files:write`（用于文件上传）
-   - `chat:write`（用于发送消息）
-3. 点击 "Install to Workspace"
-4. 复制 "Bot User OAuth Token"
-
-**RSS 源配置**
-```bash
-export RSS_FEEDS="https://finance.yahoo.com/news/rssindex"
-```
-
-**支持多个 RSS 源：**
-```bash
-export RSS_FEEDS="https://finance.yahoo.com/news/rssindex,https://feeds.reuters.com/reuters/businessNews"
-```
-
-**最大新闻数量**
-```bash
-export MAX_NEWS_ARTICLES="5"
-```
-
-### 3. 设置方法
+### 2. 设置环境变量
 
 #### 使用 .env 文件（推荐）
 ```bash
@@ -94,30 +53,18 @@ cp env.example .env
 # RSS_FEEDS=https://finance.yahoo.com/news/rssindex
 ```
 
-#### 临时设置（当前会话有效）
-```bash
-export OPENAI_API_KEY="sk-your-api-key-here"
-```
-
-#### 永久设置
-
-**macOS/Linux**
-```bash
-echo 'export OPENAI_API_KEY="sk-your-api-key-here"' >> ~/.bashrc
-source ~/.bashrc
-```
-
-**Windows**
-```cmd
-setx OPENAI_API_KEY "sk-your-api-key-here"
-```
-
 ## 运行方式
-1. 启动 API 服务：
+1. **确保激活正确的环境**
+   ```bash
+   conda activate ai_invest
+   ```
+
+2. **启动 API 服务**
    ```bash
    uvicorn main:app --reload
    ```
-2. 访问接口：
+
+3. **访问接口**
    - `GET /`：健康检查。
    - `GET /run/weekly-full-report`：执行完整流程，生成周报并返回本地文件路径。
 
@@ -125,28 +72,13 @@ setx OPENAI_API_KEY "sk-your-api-key-here"
 
 ## 测试和验证
 
-### 验证环境变量设置
-```bash
-# 检查环境变量
-echo $OPENAI_API_KEY
-
-# 或者运行测试
-python -c "from utils.env_loader import get_optional_env; print('API Key:', get_optional_env('OPENAI_API_KEY', '未设置'))"
-```
-
-### 测试 Slack 通知功能
-```bash
-python tests/test_slack_notifier.py
-```
-
 ### 测试完整流程
 ```bash
-python tests/test_run_report_simple.py
-```
+# 确保在正确的环境中
+conda activate ai_invest
 
-### 测试模拟版本（无需 API 密钥）
-```bash
-python tests/test_run_report_mock.py
+# 运行测试
+python tests/test_run_report.py
 ```
 
 ## 消息格式
@@ -171,17 +103,6 @@ python tests/test_run_report_mock.py
 - **增强通知**：发送完整报告内容（推荐）
 - **高级通知**：支持文件上传和更丰富的格式
 
-## 故障排除
-
-### 错误：404 Not Found
-- 检查 Webhook URL 是否正确
-- 确认 Slack 应用已正确配置
-- 验证频道权限
-
-### 错误：403 Forbidden
-- 检查 Webhook URL 是否有效
-- 确认应用有发送消息的权限
-
 ### 跳过 Slack 通知
 如果不想使用 Slack 通知，可以：
 1. 不设置 `SLACK_WEBHOOK_URL` 环境变量
@@ -193,6 +114,7 @@ python tests/test_run_report_mock.py
 ai-invest/
 ├── .env                    # 环境变量文件（不要提交到 git）
 ├── env.example            # 示例环境变量文件
+├── requirements.txt       # Python 依赖包列表
 ├── fetchers/              # 抓取新闻、价格、行业和宏观数据
 ├── analyzers/             # 调用 GPT 进行主题提取和周报生成
 ├── utils/                 # Markdown 报告写入与 Slack 通知
@@ -211,4 +133,5 @@ ai-invest/
 - Webhook URL 包含敏感信息，不要提交到版本控制系统
 - 定期轮换 Webhook URL
 - 限制应用的权限范围
+- **重要**：始终在正确的 conda 环境中运行项目
 

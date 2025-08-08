@@ -1,10 +1,24 @@
+# Web 框架
 fastapi
 uvicorn
-openai
+
+# AI/LLM 相关
+openai>=1.86.0
+langchain>=0.3.17
+langchain-openai>=0.3.28
+langchain-core>=0.3.74
+langsmith>=0.3.45
+python-dotenv>=1.1.1
+
+# 数据获取和处理
 yfinance
 feedparser
 newspaper3k
 beautifulsoup4
 requests
-pyyaml
 pandas
+pyyaml
+lxml[html_clean]
+
+# 工具包
+tiktoken>=0.10.0  # 用于 token 计数
