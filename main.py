@@ -8,10 +8,15 @@ from analyzers.topic_extractor import extract_topics_with_gpt
 from analyzers.llm_analyzer import generate_weekly_report
 from utils.markdown_writer import write_markdown_report
 from utils.slack_notifier import send_to_slack
+from config import APP_NAME, APP_VERSION, APP_DESCRIPTION, MAX_STOCKS_PER_ANALYSIS
 
 import datetime
 
-app = FastAPI()
+app = FastAPI(
+    title=APP_NAME,
+    version=APP_VERSION,
+    description=APP_DESCRIPTION
+)
 
 @app.get("/")
 def home():
@@ -40,7 +45,7 @@ def run_report():
             if stock_code and stock_code not in tickers:
                 tickers.append(stock_code)
     
-    tickers = list(set(tickers))[:10]
+    tickers = list(set(tickers))[:MAX_STOCKS_PER_ANALYSIS]
     price_data = get_latest_price(tickers)
     sector_data = get_sector_performance()
     macro_data = get_macro_indicators()

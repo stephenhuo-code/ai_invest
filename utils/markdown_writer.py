@@ -1,13 +1,12 @@
 
 import datetime
-import os
+from config import REPORTS_DIR
 
 def write_markdown_report(news, analysis, prices, sectors, macro):
     now = datetime.datetime.now()
     timestamp = now.strftime("%Y-%m-%d_%H-%M")
     date_display = now.strftime("%Y-%m-%d %H:%M")
-    os.makedirs("reports", exist_ok=True)
-    path = f"reports/report_{timestamp}.md"
+    path = REPORTS_DIR / f"report_{timestamp}.md"
     with open(path, "w", encoding="utf-8") as f:
         f.write(f"# 📊 投资研究周报 ({date_display})\n\n")
         f.write("## 🔥 热点新闻与分析\n")

@@ -2,17 +2,16 @@
 import feedparser
 from newspaper import Article
 from utils.env_loader import get_optional_env
+from config import RSS_FEEDS, MAX_NEWS_ARTICLES
 
-def fetch_latest_news(max_articles=5):
+def fetch_latest_news(max_articles=None):
     """获取最新新闻"""
-    # 从环境变量获取 RSS 源，如果没有则使用默认值
-    rss_feeds_str = get_optional_env("RSS_FEEDS", "https://finance.yahoo.com/news/rssindex")
+    # 使用配置文件中的默认值，如果传入参数则覆盖
+    if max_articles is None:
+        max_articles = MAX_NEWS_ARTICLES
     
-    # 支持多个 RSS 源，用逗号分隔
-    if "," in rss_feeds_str:
-        feed_urls = [url.strip() for url in rss_feeds_str.split(",")]
-    else:
-        feed_urls = [rss_feeds_str]
+    # 使用配置文件中的RSS源
+    feed_urls = RSS_FEEDS
     
     articles = []
 

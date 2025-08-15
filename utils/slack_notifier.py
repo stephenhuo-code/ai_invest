@@ -2,9 +2,15 @@
 import requests
 import os
 from utils.env_loader import get_optional_env
+from config import SLACK_ENABLED, SLACK_CHANNEL, SLACK_USERNAME, SLACK_ICON_EMOJI
 
 def send_to_slack(summary, report_path):
     """发送 Slack 通知"""
+    # 检查Slack是否启用
+    if not SLACK_ENABLED:
+        print("Slack通知已禁用，跳过发送")
+        return
+    
     webhook = get_optional_env("SLACK_WEBHOOK_URL")
     
     if not webhook:
@@ -29,12 +35,18 @@ def send_to_slack(summary, report_path):
             
             # 构建消息
             message = {
-                "text": f"*📊 投资研究周报*\n\n{report_content}"
+                "text": f"*📊 投资研究周报*\n\n{report_content}",
+                "channel": SLACK_CHANNEL,
+                "username": SLACK_USERNAME,
+                "icon_emoji": SLACK_ICON_EMOJI
             }
         else:
             # 如果文件不存在，发送摘要
             message = {
-                "text": f"*📊 投资研究周报*\n摘要：{summary}\n📄 本地报告: `{report_path}`"
+                "text": f"*📊 投资研究周报*\n摘要：{summary}\n📄 本地报告: `{report_path}`",
+                "channel": SLACK_CHANNEL,
+                "username": SLACK_USERNAME,
+                "icon_emoji": SLACK_ICON_EMOJI
             }
         
         response = requests.post(webhook, json=message)
@@ -46,7 +58,10 @@ def send_to_slack(summary, report_path):
         # 发送简化消息作为备选
         try:
             fallback_message = {
-                "text": f"*📊 投资研究周报*\n摘要：{summary}\n📄 本地报告: `{report_path}`"
+                "text": f"*📊 投资研究周报*\n摘要：{summary}\n📄 本地报告: `{report_path}`",
+                "channel": SLACK_CHANNEL,
+                "username": SLACK_USERNAME,
+                "icon_emoji": SLACK_ICON_EMOJI
             }
             requests.post(webhook, json=fallback_message)
             print("发送简化消息成功")

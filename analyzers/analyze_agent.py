@@ -5,6 +5,10 @@ from typing import List, Dict, Any, Tuple
 from pathlib import Path
 
 from utils.env_loader import get_required_env, get_optional_env
+from config import (
+    OPENAI_MODEL_ANALYZE, OPENAI_TEMPERATURE, OPENAI_MAX_TOKENS, 
+    LANGCHAIN_PROJECT, LANGCHAIN_ENDPOINT, LANGCHAIN_TRACING_V2
+)
 
 # LangChain / LangSmith
 try:
@@ -34,23 +38,27 @@ class AnalyzeAgent:
     def __init__(self) -> None:
         # OpenAI 配置
         openai_api_key = get_required_env("OPENAI_API_KEY", "OpenAI API 密钥")
-        model_name = get_optional_env("OPENAI_MODEL_ANALYZE", "gpt-4o")
+        model_name = OPENAI_MODEL_ANALYZE
 
         # LangSmith 监控（可选，通过环境变量开启）
         # 推荐：LANGCHAIN_TRACING_V2=true 且设置 LANGCHAIN_API_KEY
         # 兼容：LANGSMITH_TRACING=true
         tracing_enabled = (
-            get_optional_env("LANGCHAIN_TRACING_V2", "false").lower() in {"1", "true", "yes"}
+            get_optional_env("LANGCHAIN_TRACING_V2", str(LANGCHAIN_TRACING_V2)).lower() in {"1", "true", "yes"}
             or get_optional_env("LANGSMITH_TRACING", "false").lower() in {"1", "true", "yes"}
         )
         if tracing_enabled:
             os.environ.setdefault("LANGCHAIN_TRACING_V2", "true")
-            project = get_optional_env("LANGCHAIN_PROJECT", get_optional_env("LANGSMITH_PROJECT", "ai_invest"))
-            if project:
-                os.environ.setdefault("LANGCHAIN_PROJECT", project)
+            os.environ.setdefault("LANGCHAIN_PROJECT", LANGCHAIN_PROJECT)
+            os.environ.setdefault("LANGCHAIN_ENDPOINT", LANGCHAIN_ENDPOINT)
 
         # 初始化 LLM（单例，用于两类任务）
-        self.llm = ChatOpenAI(model=model_name, api_key=openai_api_key, temperature=0.3)
+        self.llm = ChatOpenAI(
+            model=model_name, 
+            api_key=openai_api_key, 
+            temperature=OPENAI_TEMPERATURE,
+            max_tokens=OPENAI_MAX_TOKENS
+        )
         self.output_parser = StrOutputParser()
 
         # 构建 Prompt 模板
