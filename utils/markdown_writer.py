@@ -20,7 +20,15 @@ def write_markdown_report(news, analysis, prices, sectors, macro):
             f.write(f"### {r['title']}\n")
             f.write(f"**情绪**: {sentiment}\n\n")
             f.write(f"**行业主题**: {', '.join(industry_themes) if industry_themes else '无'}\n\n")
-            f.write(f"**相关股票**: {', '.join([f'{s.get('company_name', '')}({s.get('stock_code', '')})' for s in stocks]) if stocks else '无'}\n\n")
+            # 构建股票信息字符串
+            stock_info = []
+            for s in stocks:
+                company_name = s.get('company_name', '')
+                stock_code = s.get('stock_code', '')
+                if company_name and stock_code:
+                    stock_info.append(f"{company_name}({stock_code})")
+            
+            f.write(f"**相关股票**: {', '.join(stock_info) if stock_info else '无'}\n\n")
             f.write(f"**总结**: {summary}\n\n")
 
         f.write("## 📈 股票价格\n\n")
