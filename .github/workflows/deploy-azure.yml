@@ -54,21 +54,27 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Azure login
-      uses: azure/login@v1
+    - name: Azure Login (OIDC)
+      uses: azure/login@v2
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Deploy to Azure Container Apps
-      uses: azure/container-apps-deploy-action@v1
+      uses: azure/container-apps-deploy-action@v2
       with:
-        appSourcePath: ${{ github.workspace }}
-        acrName: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-        acrUsername: ${{ secrets.REGISTRY_USERNAME }}
-        acrPassword: ${{ secrets.REGISTRY_PASSWORD }}
-        containerAppName: agent
-        resourceGroupName: rg-ai
-        imageToDeploy: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        resourceGroup: ${{ secrets.AZURE_RESOURCE_GROUP }}
+        containerAppName: ${{ secrets.AZURE_CONTAINERAPP_NAME }}
+        imageToDeploy: ghcr.io/${{ env.IMAGE_NAME }}:latest
+        registryUrl: ghcr.io
+        registryUsername: ${{ github.actor }}
+        registryPassword: ${{ secrets.GHCR_PAT }}
+        environmentVariables: 
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+        targetPort: 8000
+        ingress: external
+        location: southeastasia
 
     - name: Azure logout
       run: |
