@@ -71,17 +71,7 @@ jobs:
         registryUrl: ghcr.io
         registryUsername: ${{ github.actor }}
         registryPassword: ${{ secrets.GHCR_PAT }}
-        environmentVariables: |
-          # 应用核心环境变量
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-          SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID=${{ secrets.SLACK_CHANNEL_ID }}
-          LANGCHAIN_API_KEY=${{ secrets.LANGCHAIN_API_KEY }}
-          SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}
-          
-          # 系统环境变量
-          ENVIRONMENT=production
-          LOG_LEVEL=INFO
+        environmentVariables: "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }},SLACK_CHANNEL_ID=${{ secrets.SLACK_CHANNEL_ID }},LANGCHAIN_API_KEY=${{ secrets.LANGCHAIN_API_KEY }},SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }},ENVIRONMENT=production,LOG_LEVEL=INFO"
         targetPort: 8000
         ingress: external
         location: southeastasia
