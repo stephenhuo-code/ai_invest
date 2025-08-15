@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-简化版测试脚本
+简化版测试脚本（使用 AnalyzeAgent）
 可以跳过某些步骤进行快速测试
 """
 
@@ -15,37 +15,48 @@ from fetchers.news_fetcher import fetch_latest_news
 from fetchers.price_fetcher import get_latest_price
 from fetchers.industry_data import get_sector_performance
 from fetchers.macro_data import get_macro_indicators
-from analyzers.topic_extractor import extract_topics_with_gpt
+from analyzers.analyze_agent import AnalyzeAgent
 from utils.markdown_writer import write_markdown_report
 import datetime
 
 def run_report_simple(skip_slack=True, skip_macro=False, skip_sector=False):
-    """运行简化的周报生成流程"""
-    print("开始生成周报（简化版）...")
+    """运行简化的周报生成流程（使用 AnalyzeAgent）"""
+    print("开始生成周报（简化版，AnalyzeAgent）...")
     
     # 1. 获取最新新闻
     print("1. 获取最新新闻...")
     news = fetch_latest_news()
     print(f"获取到 {len(news)} 条新闻")
     
-    # 2. 提取主题分析
-    print("2. 提取主题分析...")
-    topic_analysis = extract_topics_with_gpt(news)
+    # 2. 提取主题分析（使用 AnalyzeAgent）
+    print("2. 提取主题分析（AnalyzeAgent）...")
+    agent = AnalyzeAgent()
+    topic_analysis = agent.extract_topics(news)
     print(f"完成主题分析，共 {len(topic_analysis)} 个主题")
     
     # 3. 提取股票代码
     print("3. 提取股票代码...")
     tickers = []
-    for r in topic_analysis:
-        for line in r["analysis"].splitlines():
-            if any(tag in line.lower() for tag in ['股票代码', '公司']):
-                tokens = line.split()
-                for t in tokens:
-                    if t.isupper() and 2 <= len(t) <= 5:
-                        tickers.append(t.strip(",.;"))
+    for i, result in enumerate(topic_analysis):
+        stocks = result.get("stocks", [])
+        print(f"   新闻 {i+1}: 找到 {len(stocks)} 只股票")
+        print(f"   新闻 {i+1} 原始数据: {result}")
+        for stock in stocks:
+            stock_code = stock.get("stock_code", "").strip()
+            company_name = stock.get("company_name", "").strip()
+            if stock_code:
+                tickers.append(stock_code)
+                print(f"     - {company_name} ({stock_code})")
+    
+    # 如果没有提取到股票代码，使用一些默认的股票进行测试
+    if not tickers:
+        print("⚠️  未提取到股票代码，使用默认股票进行测试...")
+        tickers = ["AAPL", "TSLA", "GOOGL", "MSFT", "AMZN"]
+    else:
+        print(f"✅ 成功提取到股票代码: {tickers}")
     
     tickers = list(set(tickers))[:10]
-    print(f"提取到股票代码: {tickers}")
+    print(f"最终股票列表: {tickers}")
     
     # 4. 获取价格数据
     print("4. 获取价格数据...")

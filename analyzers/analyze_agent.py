@@ -1,5 +1,6 @@
 import os
 import datetime
+import json
 from typing import List, Dict, Any, Tuple
 from pathlib import Path
 
@@ -63,14 +64,31 @@ class AnalyzeAgent:
         self.trend_chain = self.trend_prompt | self.llm | self.output_parser
         self.daily_chain = self.daily_prompt | self.llm | self.output_parser
 
-    def extract_topics(self, news_list: List[Dict[str, Any]]) -> List[Dict[str, str]]:
-        """对新闻列表做主题提取。返回 [{title, analysis}]。"""
-        results: List[Dict[str, str]] = []
+    def extract_topics(self, news_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """对新闻列表做主题提取。返回结构化的分析结果，包含股票信息。
+        
+        Returns:
+            List[Dict]: 包含以下字段的结果列表：
+            - title: 新闻标题
+            - industry_themes: 行业主题列表
+            - stocks: 股票信息列表 [{"company_name", "stock_code", "market"}]
+            - sentiment: 情绪判断
+            - summary: 简要总结
+            - raw_analysis: 原始分析文本
+        """
+        results: List[Dict[str, Any]] = []
         for item in news_list:
             title = item.get("title", "无标题")
             news_text = (item.get("text") or "").strip()
             if not news_text:
-                results.append({"title": title, "analysis": "分析失败: 新闻内容为空"})
+                results.append({
+                    "title": title, 
+                    "industry_themes": [],
+                    "stocks": [],
+                    "sentiment": "未知",
+                    "summary": "分析失败: 新闻内容为空",
+                    "raw_analysis": "分析失败: 新闻内容为空"
+                })
                 continue
 
             truncated = news_text[:2000]
@@ -83,10 +101,77 @@ class AnalyzeAgent:
                         "metadata": {"title": title},
                     },
                 )
-                results.append({"title": title, "analysis": analysis})
+                print(analysis)
+                
+                # 尝试解析JSON结果
+                try:
+                    parsed_data = json.loads(analysis)
+                    result = {
+                        "title": title,
+                        "industry_themes": parsed_data.get("industry_themes", []),
+                        "stocks": parsed_data.get("stocks", []),
+                        "sentiment": parsed_data.get("sentiment", "未知"),
+                        "summary": parsed_data.get("summary", ""),
+                        "raw_analysis": analysis
+                    }
+                except json.JSONDecodeError:
+                    # 如果JSON解析失败，返回原始分析结果
+                    result = {
+                        "title": title,
+                        "industry_themes": [],
+                        "stocks": [],
+                        "sentiment": "未知",
+                        "summary": "JSON解析失败",
+                        "raw_analysis": analysis
+                    }
+                
+                results.append(result)
             except Exception as e:
-                results.append({"title": title, "analysis": f"分析失败: {str(e)}"})
+                results.append({
+                    "title": title,
+                    "industry_themes": [],
+                    "stocks": [],
+                    "sentiment": "未知",
+                    "summary": f"分析失败: {str(e)}",
+                    "raw_analysis": f"分析失败: {str(e)}"
+                })
         return results
+
+    def extract_all_stocks(self, analysis_results: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+        """从分析结果中提取所有股票信息，用于后续股票分析。
+        
+        Args:
+            analysis_results: extract_topics 方法返回的分析结果列表
+            
+        Returns:
+            List[Dict]: 去重后的股票信息列表，每个元素包含：
+            - company_name: 公司名称
+            - stock_code: 股票代码
+            - market: 市场
+            - sentiment: 相关新闻的情绪
+        """
+        all_stocks = []
+        seen_stocks = set()
+        
+        for result in analysis_results:
+            stocks = result.get("stocks", [])
+            sentiment = result.get("sentiment", "未知")
+            
+            for stock in stocks:
+                stock_code = stock.get("stock_code", "").strip()
+                company_name = stock.get("company_name", "").strip()
+                market = stock.get("market", "").strip()
+                
+                if stock_code and stock_code not in seen_stocks:
+                    seen_stocks.add(stock_code)
+                    all_stocks.append({
+                        "company_name": company_name,
+                        "stock_code": stock_code,
+                        "market": market,
+                        "sentiment": sentiment
+                    })
+        
+        return all_stocks
 
     def generate_daily_report(self, sector_data: Any, macro_data: Any) -> Tuple[str, str]:
         """基于行业与宏观数据生成每日报告。

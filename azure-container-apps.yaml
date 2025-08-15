@@ -1,0 +1,72 @@
+apiVersion: 2023-05-01
+location: southeastasia
+name: agent
+properties:
+  managedEnvironmentId: /subscriptions/{subscription-id}/resourceGroups/rg-ai/providers/Microsoft.App/managedEnvironments/cae-agent
+  configuration:
+    ingress:
+      external: true
+      targetPort: 8000
+      allowInsecure: false
+      traffic:
+        - latestRevision: true
+          weight: 100
+    secrets:
+      - name: openai-api-key
+        value: "{{OPENAI_API_KEY}}"
+      - name: langchain-api-key
+        value: "{{LANGCHAIN_API_KEY}}"
+      - name: slack-webhook-url
+        value: "{{SLACK_WEBHOOK_URL}}"
+    registries:
+      - server: ghcr.io
+        username: "{{REGISTRY_USERNAME}}"
+        passwordSecretRef: registry-password
+  template:
+    containers:
+      - name: agent
+        image: ghcr.io/stephenhuo-code/ai_invest:latest
+        resources:
+          cpu: 1.0
+          memory: 2.0Gi
+        env:
+          - name: OPENAI_API_KEY
+            secretRef: openai-api-key
+          - name: LANGCHAIN_API_KEY
+            secretRef: langchain-api-key
+          - name: SLACK_WEBHOOK_URL
+            secretRef: slack-webhook-url
+          - name: LANGCHAIN_TRACING_V2
+            value: "true"
+          - name: LANGCHAIN_PROJECT
+            value: "ai_invest"
+        probes:
+          - type: Readiness
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          - type: Liveness
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+        ports:
+          - port: 8000
+            protocol: TCP
+    scale:
+      minReplicas: 1
+      maxReplicas: 5
+      rules:
+        - name: http-rule
+          http:
+            metadata:
+              concurrentRequests: "100"
+        - name: cpu-rule
+          custom:
+            type: cpu
+            metadata:
+              type: Utilization
+              value: "70" 

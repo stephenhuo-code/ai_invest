@@ -23,12 +23,23 @@ def run_report():
     topic_analysis = extract_topics_with_gpt(news)
     tickers = []
     for r in topic_analysis:
-        for line in r["analysis"].splitlines():
+        # 从raw_analysis中提取股票代码
+        raw_analysis = r.get("raw_analysis", "")
+        for line in raw_analysis.splitlines():
             if any(tag in line.lower() for tag in ['股票代码', '公司']):
                 tokens = line.split()
                 for t in tokens:
                     if t.isupper() and 2 <= len(t) <= 5:
                         tickers.append(t.strip(",.;"))
+    
+    # 也从stocks字段中提取股票代码
+    for r in topic_analysis:
+        stocks = r.get("stocks", [])
+        for stock in stocks:
+            stock_code = stock.get("stock_code", "")
+            if stock_code and stock_code not in tickers:
+                tickers.append(stock_code)
+    
     tickers = list(set(tickers))[:10]
     price_data = get_latest_price(tickers)
     sector_data = get_sector_performance()
