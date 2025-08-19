@@ -100,33 +100,55 @@ def run_report():
         # 2. 提取主题分析
         print("3. 提取主题分析...")
         topic_analysis = agent.extract_topics(news)
+
+        print(topic_analysis)
         print(f"完成主题分析，共 {len(topic_analysis)} 个主题")
         
-        # 打印详细的分析结果
-        print("\n📊 详细分析结果:")
-        print("=" * 80)
-        for i, result in enumerate(topic_analysis, 1):
-            print(f"\n--- 新闻 {i}: {result['title']} ---")
-            print(f"🎯 行业主题: {result.get('industry_themes', [])}")
-            print(f"📈 情绪: {result.get('sentiment', '未知')}")
-            print(f"💡 总结: {result.get('summary', '无')}")
-            
-            stocks = result.get('stocks', [])
-            if stocks:
-                print(f"📋 涉及股票 ({len(stocks)} 只):")
-                for stock in stocks:
-                    print(f"   • {stock.get('company_name', 'N/A')} ({stock.get('stock_code', 'N/A')}) - {stock.get('market', 'N/A')}")
-            else:
-                print("   • 未识别到具体股票")
-            
-            # 打印原始分析文本（用于调试）
-            raw_analysis = result.get('raw_analysis', '')
-            if raw_analysis and len(raw_analysis) > 200:
-                print(f"📄 原始分析 (前200字符): {raw_analysis[:200]}...")
-            elif raw_analysis:
-                print(f"📄 原始分析: {raw_analysis}")
         
-        print("=" * 80)
+        # 打印详细的分析结果
+        ##print("\n📊 详细分析结果:")
+        ##print("=" * 80)
+        
+        # for i, result in enumerate(topic_analysis, 1):
+        #     print(f"\n--- 新闻 {i}: {result.get('title', '无标题')} ---")
+        #     print(f"🎯 行业主题: {result.get('industry_themes', [])}")
+        #     print(f"📈 情绪: {result.get('sentiment', '未知')}")
+        #     print(f"💡 总结: {result.get('summary', '无')}")
+        #     
+        #     stocks = result.get('stocks', [])
+        #     # 检查原始数据中是否有股票信息但未被正确解析
+        #     if not stocks:
+        #         # 尝试从原始分析文本中解析股票信息
+        #         raw_analysis = result.get('raw_analysis', '')
+        #         extracted_stocks = []
+        #         if raw_analysis:
+        #             # 假设原始分析为JSON格式，尝试解析
+        #             import json
+        #             try:
+        #                 raw_json = json.loads(raw_analysis)
+        #                 extracted_stocks = raw_json.get('stocks', [])
+        #             except Exception:
+        #                 pass
+        #         if extracted_stocks:
+        #             print(f"📋 涉及股票 ({len(extracted_stocks)} 只):")
+        #             for stock in extracted_stocks:
+        #                 print(f"   • {stock.get('company_name', 'N/A')} ({stock.get('stock_code', 'N/A')}) - {stock.get('market', 'N/A')}")
+        #         else:
+        #             print("   • 未识别到具体股票")
+        #     else:
+        #         print(f"📋 涉及股票 ({len(stocks)} 只):")
+        #         for stock in stocks:
+        #             print(f"   • {stock.get('company_name', 'N/A')} ({stock.get('stock_code', 'N/A')}) - {stock.get('market', 'N/A')}")
+        #     
+        #     # 打印原始分析文本（用于调试）
+        #     raw_analysis = result.get('raw_analysis', '')
+        #     if raw_analysis and len(raw_analysis) > 200:
+        #         print(f"📄 原始分析 (前200字符): {raw_analysis[:200]}...")
+        #     elif raw_analysis:
+        #         print(f"📄 原始分析: {raw_analysis}")
+        # 
+        # print("=" * 80)
+        
         
         # 打印股票提取汇总
         stock_summary = print_stock_summary(topic_analysis)

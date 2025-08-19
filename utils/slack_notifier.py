@@ -6,15 +6,19 @@ from config import SLACK_ENABLED, SLACK_CHANNEL, SLACK_USERNAME, SLACK_ICON_EMOJ
 
 def send_to_slack(summary, report_path):
     """发送 Slack 通知"""
+    print(f"🔔 尝试发送 Slack 通知...")
+    print(f"   - 摘要: {summary[:100]}...")
+    print(f"   - 报告路径: {report_path}")
+    
     # 检查Slack是否启用
     if not SLACK_ENABLED:
-        print("Slack通知已禁用，跳过发送")
+        print("❌ Slack通知已禁用，跳过发送")
         return
     
     webhook = get_optional_env("SLACK_WEBHOOK_URL")
     
     if not webhook:
-        print("未设置 SLACK_WEBHOOK_URL 环境变量，跳过 Slack 通知")
+        print("❌ 未设置 SLACK_WEBHOOK_URL 环境变量，跳过 Slack 通知")
         return
     
     # 检查是否是示例 URL
@@ -51,7 +55,9 @@ def send_to_slack(summary, report_path):
         
         response = requests.post(webhook, json=message)
         response.raise_for_status()
-        print("Slack 通知发送成功")
+        print("✅ Slack 通知发送成功")
+        print(f"   - 状态码: {response.status_code}")
+        print(f"   - 响应: {response.text}")
         
     except Exception as e:
         print(f"Slack 通知发送失败: {str(e)}")

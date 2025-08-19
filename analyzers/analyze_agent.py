@@ -7,7 +7,7 @@ from pathlib import Path
 from utils.env_loader import get_required_env, get_optional_env
 from config import (
     OPENAI_MODEL_ANALYZE, OPENAI_TEMPERATURE, OPENAI_MAX_TOKENS, 
-    LANGCHAIN_PROJECT, LANGCHAIN_ENDPOINT, LANGCHAIN_TRACING_V2
+    LANGSMITH_PROJECT, LANGSMITH_ENDPOINT, LANGSMITH_TRACING
 )
 
 # LangChain / LangSmith
@@ -36,21 +36,18 @@ class AnalyzeAgent:
     """使用单一 LangChain Agent 完成主题提取与周报生成。支持 LangSmith 监控。"""
 
     def __init__(self) -> None:
+        # 确保启用 LangSmith 跟踪
+        if LANGSMITH_TRACING:
+            os.environ["LANGSMITH_TRACING"] = "true"
+            os.environ["LANGSMITH_PROJECT"] = LANGSMITH_PROJECT
+            os.environ["LANGSMITH_ENDPOINT"] = LANGSMITH_ENDPOINT
+            print(f"✅ LangSmith 跟踪已启用: 项目={LANGSMITH_PROJECT}, 端点={LANGSMITH_ENDPOINT}")
+        else:
+            print("⚠️  LangSmith 跟踪未启用")
+        
         # OpenAI 配置
         openai_api_key = get_required_env("OPENAI_API_KEY", "OpenAI API 密钥")
         model_name = OPENAI_MODEL_ANALYZE
-
-        # LangSmith 监控（可选，通过环境变量开启）
-        # 推荐：LANGCHAIN_TRACING_V2=true 且设置 LANGCHAIN_API_KEY
-        # 兼容：LANGSMITH_TRACING=true
-        tracing_enabled = (
-            get_optional_env("LANGCHAIN_TRACING_V2", str(LANGCHAIN_TRACING_V2)).lower() in {"1", "true", "yes"}
-            or get_optional_env("LANGSMITH_TRACING", "false").lower() in {"1", "true", "yes"}
-        )
-        if tracing_enabled:
-            os.environ.setdefault("LANGCHAIN_TRACING_V2", "true")
-            os.environ.setdefault("LANGCHAIN_PROJECT", LANGCHAIN_PROJECT)
-            os.environ.setdefault("LANGCHAIN_ENDPOINT", LANGCHAIN_ENDPOINT)
 
         # 初始化 LLM（单例，用于两类任务）
         self.llm = ChatOpenAI(

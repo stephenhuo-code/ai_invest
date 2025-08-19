@@ -32,9 +32,9 @@ OPENAI_MAX_TOKENS = 4000
 OPENAI_TIMEOUT = 120
 
 # LangChain配置 (非敏感部分)
-LANGCHAIN_PROJECT = "ai_invest"
-LANGCHAIN_ENDPOINT = "https://api.smith.langchain.com"
-LANGCHAIN_TRACING_V2 = True  # 默认关闭，可通过环境变量覆盖
+LANGSMITH_PROJECT = "ai_invest"
+LANGSMITH_ENDPOINT = "https://api.smith.langchain.com"
+LANGSMITH_TRACING = True  # 默认关闭，可通过环境变量覆盖
 
 # RSS源配置
 RSS_FEEDS = ["https://finance.yahoo.com/news/rssindex"]
@@ -60,7 +60,7 @@ REPORT_TEMPLATE = "default"
 REPORT_LANGUAGE = "zh-CN"  # zh-CN, en-US
 
 # Slack配置 (非敏感部分)
-SLACK_ENABLED = False  # 默认关闭，可通过环境变量覆盖
+SLACK_ENABLED = True  # 默认启用，可通过环境变量覆盖
 SLACK_CHANNEL = "#ai-invest"
 SLACK_USERNAME = "AI Invest Bot"
 SLACK_ICON_EMOJI = ":chart_with_upwards_trend:"

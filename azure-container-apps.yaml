@@ -14,8 +14,8 @@ properties:
     secrets:
       - name: openai-api-key
         value: "{{OPENAI_API_KEY}}"
-      - name: langchain-api-key
-        value: "{{LANGCHAIN_API_KEY}}"
+      - name: langsmith-api-key
+        value: "{{LANGSMITH_API_KEY}}"
       - name: slack-webhook-url
         value: "{{SLACK_WEBHOOK_URL}}"
     registries:
@@ -32,13 +32,13 @@ properties:
         env:
           - name: OPENAI_API_KEY
             secretRef: openai-api-key
-          - name: LANGCHAIN_API_KEY
-            secretRef: langchain-api-key
+          - name: LANGSMITH_API_KEY
+                          secretRef: langsmith-api-key
           - name: SLACK_WEBHOOK_URL
             secretRef: slack-webhook-url
-          - name: LANGCHAIN_TRACING_V2
+          - name: LANGSMITH_TRACING
             value: "true"
-          - name: LANGCHAIN_PROJECT
+          - name: LANGSMITH_PROJECT
             value: "ai_invest"
         probes:
           - type: Readiness

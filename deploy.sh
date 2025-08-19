@@ -78,7 +78,7 @@ az containerapp create \
     --memory 2.0Gi \
     --min-replicas 1 \
     --max-replicas 5 \
-    --env-vars LANGCHAIN_TRACING_V2=true LANGCHAIN_PROJECT=ai_invest
+    --env-vars LANGSMITH_TRACING=true LANGSMITH_PROJECT=ai_invest
 
 echo "✅ 部署完成!"
 echo "🌐 应用URL: https://$(az containerapp show --name $CONTAINER_APP_NAME --resource-group $AZURE_RESOURCE_GROUP --query properties.configuration.ingress.fqdn -o tsv)"
