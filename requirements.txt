@@ -1,6 +1,15 @@
 # Web 框架
-fastapi
-uvicorn
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+
+# 数据库和ORM
+sqlalchemy[asyncio]>=2.0.0
+asyncpg>=0.29.0
+alembic>=1.13.0
+
+# Vector database support
+pgvector>=0.2.0
 
 # AI/LLM 相关
 openai>=1.86.0
@@ -11,14 +20,33 @@ langsmith>=0.3.45
 python-dotenv>=1.1.1
 
 # 数据获取和处理
-yfinance
-feedparser
-newspaper3k
-beautifulsoup4
-requests
-pandas
-pyyaml
-lxml[html_clean]
+yfinance>=0.2.0
+feedparser>=6.0.0
+newspaper3k>=0.2.8
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+pandas>=2.1.0
+numpy>=1.24.0
+pyyaml>=6.0
+lxml[html_clean]>=4.9.0
+python-dateutil>=2.8.0
+
+# 缓存
+python-multipart>=0.0.6
 
 # 工具包
-tiktoken>=0.10.0  # 用于 token 计数
+tiktoken>=0.10.0
+
+# 日志和监控
+structlog>=23.2.0
+python-json-logger>=2.0.0
+
+# 开发和测试
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+httpx>=0.25.0  # For testing FastAPI
+
+# 类型检查
+mypy>=1.7.0
+types-requests>=2.31.0

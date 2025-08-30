@@ -1,0 +1,1 @@
+"""Domain repositories for AI Invest platform."""

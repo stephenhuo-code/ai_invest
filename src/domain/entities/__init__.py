@@ -1,0 +1,1 @@
+"""Domain entities for AI Invest platform."""

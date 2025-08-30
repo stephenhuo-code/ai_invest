@@ -1,0 +1,1 @@
+# AI Invest Trend - Source Code Root

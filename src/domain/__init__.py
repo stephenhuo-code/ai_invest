@@ -1,0 +1,1 @@
+"""Domain layer for AI Invest platform."""

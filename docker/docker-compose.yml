@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  app:
+    build: ..
+    ports:
+      - "8000:8000"
+    environment:
+      # Database configuration
+      - DATABASE_URL=postgresql+asyncpg://ai_invest:ai_invest_password@postgres:5432/ai_invest
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=ai_invest
+      - DATABASE_USER=ai_invest
+      - DATABASE_PASSWORD=ai_invest_password
+      
+      # Application configuration
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+      
+      # Cache configuration
+      - CACHE_TYPE=memory
+      
+      # Vector configuration
+      - VECTOR_STORAGE_PROVIDER=postgresql
+      - VECTOR_DIMENSION=1536
+      
+      # External API keys (override in .env file)
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+      - RSS_FEEDS=${RSS_FEEDS:-https://finance.yahoo.com/news/rssindex}
+    volumes:
+      - ..:/app
+      - ../reports:/app/reports
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - ai-invest-network
+
+  postgres:
+    image: pgvector/pgvector:pg15
+    environment:
+      POSTGRES_DB: ai_invest
+      POSTGRES_USER: ai_invest
+      POSTGRES_PASSWORD: ai_invest_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../scripts/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai_invest -d ai_invest"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ai-invest-network
+
+  pgadmin:
+    image: dpage/pgadmin4:7
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@aiinvest.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - ai-invest-network
+    profiles:
+      - admin
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  ai-invest-network:
+    driver: bridge
